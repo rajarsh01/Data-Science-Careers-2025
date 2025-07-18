@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Global State of Data Science Careers in 2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The SPA is designed around a thematic, user-centric flow rather than a linear report structure. The goal is to allow users to explore information based on their primary interest (e.g., a specific role, a geographical market, or salary potential) without a prescribed path. The structure includes: 1) A main dashboard for high-level market trends. 2) An interactive "Roles Explorer" to deeply compare roles and their required skills side-by-side. 3) A "Global Market Insights" section with filters for regional analysis of jobs and salaries. 4) A "Career & Salary" section to visualize progression and earning potential by role. 5) A "Future Outlook" section for forward-looking insights. This non-linear, task-oriented structure empowers users to directly access the most relevant information, making the dense report data highly digestible and personally applicable. -->
+    <!-- Visualization & Content Choices: 
+        - Top Industries: (Report Info: Top 5 industries) -> Goal: Inform -> Viz: Horizontal Bar Chart (Chart.js) -> Interaction: Hover tooltips -> Justification: Best for ranking comparison.
+        - Role Skills Comparison: (Report Info: Skills for each role) -> Goal: Compare -> Viz: Radar Chart (Chart.js) -> Interaction: Dropdown selects a role, updating the chart -> Justification: Excellent for showing multi-variable strengths for a single entity (a role).
+        - Geographical Job/Salary Data: (Report Info: Regional market comparison) -> Goal: Compare -> Viz: Two Bar Charts (Chart.js) -> Interaction: Dropdown selects a region, updating both charts -> Justification: Allows direct, side-by-side comparison of job volume and salary across cities within a selected region.
+        - Salary by Experience: (Report Info: Salary benchmarks per role/level) -> Goal: Compare -> Viz: Bar Chart (Chart.js) -> Interaction: Dropdown selects a role, updating chart with Entry/Mid/Senior salaries -> Justification: Clearly illustrates salary growth for specific career tracks.
+        - Career Path: (Report Info: Typical career progression) -> Goal: Organize -> Viz: Styled HTML/CSS Flexbox diagram -> Interaction: Hover effects -> Justification: A clean, semantic, and non-graphical way to show flow and hierarchy.
+        - Textual Insights (Trends, Future, etc.): (Report Info: Qualitative analysis) -> Goal: Inform -> Presentation: Styled cards and accordion sections -> Interaction: Click to expand -> Justification: Manages information density and improves readability by grouping related concepts.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC; /* slate-50 */
+            color: #334155; /* slate-700 */
+        }
+        .nav-link {
+            transition: color 0.2s;
+        }
+        .nav-link:hover {
+            color: #3B82F6; /* blue-500 */
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .tab-button {
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .tab-button.active {
+            background-color: #3B82F6; /* blue-500 */
+            color: white;
+            border-color: #3B82F6;
+        }
+        .career-step {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            padding: 1rem;
+            border: 1px solid #E2E8F0; /* slate-200 */
+            border-radius: 0.5rem;
+            background-color: white;
+            text-align: center;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .career-step:hover {
+            background-color: #EFF6FF; /* blue-50 */
+            border-color: #BFDBFE; /* blue-200 */
+        }
+        .career-arrow {
+            color: #94A3B8; /* slate-400 */
+            font-size: 1.5rem;
+            margin: 0 1rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-lg font-bold text-slate-800">Data Science Careers 2025</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#market-trends" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Market Trends</a>
+                        <a href="#roles-explorer" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Roles Explorer</a>
+                        <a href="#geo-insights" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Global Insights</a>
+                        <a href="#career-path" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Career & Salary</a>
+                        <a href="#future-outlook" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Future Outlook</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <section id="hero" class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-slate-800">The Global State of Data Science Careers</h2>
+            <p class="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-slate-600">An interactive guide to the roles, skills, salaries, and trends shaping the data-driven world of 2025.</p>
+        </section>
+
+        <section id="market-trends" class="mb-20">
+            <h3 class="text-2xl font-bold text-center mb-2 text-slate-800">Current Market & Industry Trends</h3>
+             <p class="text-center text-slate-600 mb-10 max-w-3xl mx-auto">The demand for data professionals continues to surge across various sectors. This section highlights the key industries driving this growth and the overarching trends influencing the job market, from AI advancements to data governance. Understanding these dynamics is crucial for navigating your career path.</p>
+            <div class="grid md:grid-cols-5 gap-8 items-center">
+                <div class="md:col-span-3 card p-6">
+                     <h4 class="font-semibold text-lg text-slate-700 text-center mb-4">Top 5 Industries with Highest Demand</h4>
+                    <div class="chart-container h-[300px] md:h-[350px]">
+                        <canvas id="industryDemandChart"></canvas>
+                    </div>
+                </div>
+                <div class="md:col-span-2 space-y-4">
+                    <div class="card p-5">
+                        <h5 class="font-semibold text-slate-700">Rise of Generative AI</h5>
+                        <p class="text-sm text-slate-600 mt-1">Creating new roles like Prompt Engineer and increasing demand for AI specialists with skills in LLMs and generative models.</p>
+                    </div>
+                    <div class="card p-5">
+                        <h5 class="font-semibold text-slate-700">Data Privacy & Ethics</h5>
+                        <p class="text-sm text-slate-600 mt-1">Growing importance of roles focusing on data governance, security, and ethical AI implementation, driven by regulations like GDPR.</p>
+                    </div>
+                    <div class="card p-5">
+                        <h5 class="font-semibold text-slate-700">Shift to Cloud Platforms</h5>
+                        <p class="text-sm text-slate-600 mt-1">Expertise in AWS, GCP, and Azure is no longer optional. Cloud skills are essential for scalability, efficiency, and MLOps.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="roles-explorer" class="mb-20">
+            <h3 class="text-2xl font-bold text-center mb-2 text-slate-800">Data Science Roles Explorer</h3>
+            <p class="text-center text-slate-600 mb-10 max-w-3xl mx-auto">The field of data science is diverse, with specialized roles that cater to different parts of the data lifecycle. Select a role from the dropdown to explore its core responsibilities, primary focus, and the essential skills required for success. This interactive explorer helps you understand the nuances between different career tracks.</p>
+            <div class="card p-6 md:p-8">
+                <div class="mb-6">
+                    <label for="roleSelector" class="block text-sm font-medium text-slate-600 mb-2">Select a Role to Explore:</label>
+                    <select id="roleSelector" class="w-full md:w-1/2 p-2 border border-slate-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="data-scientist" selected>Data Scientist</option>
+                        <option value="data-analyst">Data Analyst</option>
+                        <option value="data-engineer">Data Engineer</option>
+                        <option value="ml-engineer">Machine Learning Engineer</option>
+                        <option value="ai-specialist">AI Specialist / Research Scientist</option>
+                        <option value="bi-analyst">Business Intelligence (BI) Analyst</option>
+                        <option value="mlops-engineer">MLOps Engineer</option>
+                    </select>
+                </div>
+                <div class="grid md:grid-cols-5 gap-8">
+                    <div id="roleDetails" class="md:col-span-3">
+                    </div>
+                    <div class="md:col-span-2">
+                        <h4 class="font-semibold text-lg text-slate-700 text-center mb-4">Critical Skills Landscape</h4>
+                        <div class="chart-container h-[300px] md:h-[350px]">
+                            <canvas id="roleSkillsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="geo-insights" class="mb-20">
+            <h3 class="text-2xl font-bold text-center mb-2 text-slate-800">Global Market Insights</h3>
+            <p class="text-center text-slate-600 mb-10 max-w-3xl mx-auto">Job opportunities and compensation in data science vary significantly by location. This section provides a comparative analysis of key global hubs. Use the filter to switch between regions and see how job volume, average salaries, and industry focus differ across major tech centers.</p>
+            <div class="card p-6 md:p-8">
+                 <div class="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <h4 class="font-semibold text-lg text-slate-700">Geographical Job Market Comparison</h4>
+                    <select id="regionSelector" class="w-full md:w-auto p-2 border border-slate-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="north-america" selected>North America</option>
+                        <option value="europe">Europe</option>
+                        <option value="asia-pacific">Asia-Pacific</option>
+                    </select>
+                </div>
+                <div id="geo-info" class="mb-8 p-4 bg-slate-50 rounded-md border border-slate-200"></div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                         <h5 class="font-semibold text-center text-slate-700 mb-4">Relative Job Volume</h5>
+                        <div class="chart-container h-[300px] md:h-[350px]">
+                            <canvas id="jobVolumeChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                         <h5 class="font-semibold text-center text-slate-700 mb-4">Average Salary Ranges (USD)</h5>
+                        <div class="chart-container h-[300px] md:h-[350px]">
+                            <canvas id="salaryRegionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="career-path" class="mb-20">
+            <h3 class="text-2xl font-bold text-center mb-2 text-slate-800">Career Progression & Salary</h3>
+            <p class="text-center text-slate-600 mb-10 max-w-3xl mx-auto">A career in data science offers significant growth potential. Below, we outline a typical progression from entry-level to leadership, alongside an interactive salary benchmark tool. Select a role to see how compensation evolves with experience, giving you a clear picture of your potential earnings over time.</p>
+            <div class="mb-12">
+                <h4 class="font-semibold text-lg text-slate-700 text-center mb-6">Typical Career Path</h4>
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0">
+                    <div class="career-step justify-center"><span>Entry-Level Analyst /<br>Junior Scientist</span></div>
+                    <div class="career-arrow hidden md:block">&rarr;</div>
+                    <div class="career-step justify-center"><span>Mid-Level Data Scientist /<br>Engineer</span></div>
+                    <div class="career-arrow hidden md:block">&rarr;</div>
+                    <div class="career-step justify-center"><span>Senior / Lead <br>Data Scientist</span></div>
+                    <div class="career-arrow hidden md:block">&rarr;</div>
+                    <div class="career-step justify-center"><span>Principal Scientist /<br>Head of AI</span></div>
+                </div>
+            </div>
+
+            <div class="card p-6 md:p-8">
+                <div class="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <h4 class="font-semibold text-lg text-slate-700">Salary Benchmarks by Role & Experience</h4>
+                    <select id="salaryRoleSelector" class="w-full md:w-auto p-2 border border-slate-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="data-scientist" selected>Data Scientist</option>
+                        <option value="data-analyst">Data Analyst</option>
+                        <option value="data-engineer">Data Engineer</option>
+                        <option value="ml-engineer">Machine Learning Engineer</option>
+                    </select>
+                </div>
+                <div class="chart-container h-[300px] md:h-[350px]">
+                    <canvas id="salaryExperienceChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="future-outlook" class="mb-12">
+            <h3 class="text-2xl font-bold text-center mb-2 text-slate-800">Future Outlook & Pathways</h3>
+            <p class="text-center text-slate-600 mb-10 max-w-3xl mx-auto">The data science landscape is constantly evolving. This final section explores future predictions, emerging roles, and the educational pathways that lead into the field. Staying informed about these trends is key to building a resilient and future-proof career.</p>
+            <div class="space-y-6">
+                <details class="card p-5" open>
+                    <summary class="font-semibold text-slate-700 cursor-pointer">Future Predictions & Role Evolution (2026-2030)</summary>
+                    <p class="mt-3 text-slate-600">Expect a blurring of lines between roles. Data Analysts will adopt more ML techniques, while Data Scientists will need stronger engineering skills. Roles will become more specialized, focusing on domains like NLP, Computer Vision, or specific industries. The 'full-stack' data scientist will be rare; collaborative teams of specialists will be the norm.</p>
+                </details>
+                <details class="card p-5">
+                    <summary class="font-semibold text-slate-700 cursor-pointer">Prominent Emerging Roles</summary>
+                    <ul class="mt-3 text-slate-600 list-disc list-inside space-y-2">
+                        <li><strong>AI Ethics Officer:</strong> Ensures AI systems are developed and deployed responsibly, fairly, and transparently.</li>
+                        <li><strong>AI Product Manager:</strong> Bridges the gap between technical AI/ML teams and business objectives to deliver AI-powered products.</li>
+                        <li><strong>Prompt Engineer:</strong> Specializes in designing, refining, and optimizing inputs for generative AI models to achieve desired outputs.</li>
+                    </ul>
+                </details>
+                <details class="card p-5">
+                    <summary class="font-semibold text-slate-700 cursor-pointer">Impact of AI on Required Skills</summary>
+                     <p class="mt-3 text-slate-600">Automation will handle routine data cleaning and model building. The focus will shift to higher-level skills: defining business problems, interpreting complex models, strategic thinking, and communicating results effectively. Lifelong learning and adaptability will be more critical than ever. Skills to learn now include MLOps, advanced cloud architecture, and understanding the principles behind large language models (LLMs).</p>
+                </details>
+                 <details class="card p-5">
+                    <summary class="font-semibold text-slate-700 cursor-pointer">Educational Pathways & Credentials</summary>
+                    <p class="mt-3 text-slate-600">While traditional degrees in Computer Science, Statistics, and Math remain valuable, the industry is increasingly open. A Master's or Ph.D. is often preferred for research-heavy roles. However, practical experience and a strong portfolio can outweigh formal education. Professional certifications (e.g., AWS Certified Machine Learning, Google Professional Data Engineer) and reputable bootcamps are highly regarded for demonstrating specific, in-demand skills, especially for career changers.</p>
+                </details>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-slate-800 text-slate-300 mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm">
+            <p>Interactive Report by AI Assistant | Data based on "The Global State of Data Science Careers in 2025" Report.</p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        const formatCurrency = (value) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+
+        const industryDemandData = {
+            labels: ['Technology', 'Finance', 'Healthcare', 'E-commerce', 'Consulting'],
+            datasets: [{
+                label: 'Relative Demand',
+                data: [95, 88, 82, 75, 70],
+                backgroundColor: ['#60A5FA', '#818CF8', '#A78BFA', '#F472B6', '#FB923C'],
+                borderColor: 'white',
+                borderWidth: 2,
+            }]
+        };
+
+        const rolesData = {
+            'data-scientist': {
+                title: 'Data Scientist',
+                description: 'A versatile role focused on extracting insights from data using statistical analysis, machine learning, and data modeling. They answer complex business questions and build predictive models.',
+                responsibilities: ['Developing ML models', 'Performing statistical analysis', 'Communicating findings to stakeholders', 'Data mining and cleaning'],
+                skills: { 'Python/R': 9, 'SQL': 8, 'ML Frameworks': 9, 'Big Data': 7, 'Visualization': 8, 'Business Acumen': 9 }
+            },
+            'data-analyst': {
+                title: 'Data Analyst',
+                description: 'Focuses on interpreting data, analyzing results using statistical techniques, and providing ongoing reports. They translate data into actionable insights for business decision-making.',
+                responsibilities: ['Creating dashboards and reports', 'Analyzing business metrics', 'Identifying trends and patterns', 'Presenting data to management'],
+                skills: { 'Python/R': 7, 'SQL': 9, 'ML Frameworks': 4, 'Big Data': 5, 'Visualization': 9, 'Business Acumen': 8 }
+            },
+            'data-engineer': {
+                title: 'Data Engineer',
+                description: 'Builds and maintains the data architecture, pipelines, and infrastructure. They ensure data is clean, reliable, and accessible for use by data scientists and analysts.',
+                responsibilities: ['Designing and building data pipelines', 'Managing data warehouses and lakes', 'Ensuring data quality and reliability', 'Working with big data technologies'],
+                skills: { 'Python/R': 8, 'SQL': 9, 'ML Frameworks': 3, 'Big Data': 10, 'Visualization': 4, 'Business Acumen': 6 }
+            },
+            'ml-engineer': {
+                title: 'Machine Learning Engineer',
+                description: 'A specialized software engineer who operationalizes machine learning models. They build, deploy, and maintain ML systems in production environments at scale.',
+                responsibilities: ['Deploying ML models to production', 'Building scalable ML systems', 'Optimizing model performance', 'Managing the ML lifecycle (MLOps)'],
+                skills: { 'Python/R': 9, 'SQL': 7, 'ML Frameworks': 10, 'Big Data': 8, 'Visualization': 5, 'Business Acumen': 7 }
+            },
+            'ai-specialist': {
+                title: 'AI Specialist / Research Scientist',
+                description: 'Focuses on creating new algorithms and pushing the boundaries of AI and machine learning. Often research-oriented, requiring a deep theoretical and mathematical background.',
+                responsibilities: ['Conducting novel research', 'Developing new AI algorithms', 'Publishing papers and patents', 'Experimenting with cutting-edge models (e.g., LLMs)'],
+                skills: { 'Python/R': 10, 'SQL': 6, 'ML Frameworks': 10, 'Big Data': 7, 'Visualization': 6, 'Business Acumen': 7 }
+            },
+            'bi-analyst': {
+                title: 'Business Intelligence (BI) Analyst',
+                description: 'Specializes in using BI tools to analyze data and create visualizations that help organizations make strategic business decisions. Very focused on business performance metrics.',
+                responsibilities: ['Developing interactive dashboards (Tableau, Power BI)', 'Analyzing sales, marketing, and operations data', 'Automating reporting processes', 'Communicating with business leaders'],
+                skills: { 'Python/R': 5, 'SQL': 9, 'ML Frameworks': 2, 'Big Data': 6, 'Visualization': 10, 'Business Acumen': 9 }
+            },
+            'mlops-engineer': {
+                title: 'MLOps Engineer',
+                description: 'A hybrid role combining machine learning, DevOps, and data engineering. They focus on automating and streamlining the end-to-end machine learning lifecycle.',
+                responsibilities: ['Building CI/CD pipelines for ML', 'Automating model training and deployment', 'Monitoring models in production', 'Managing cloud infrastructure for ML'],
+                skills: { 'Python/R': 8, 'SQL': 7, 'ML Frameworks': 8, 'Big Data': 9, 'Visualization': 4, 'Business Acumen': 6 }
+            }
+        };
+
+        const geoData = {
+            'north-america': {
+                info: '<strong>Focus:</strong> Dominated by big tech, finance, and a mature startup ecosystem. High demand for AI specialists and ML engineers, especially in hubs like Silicon Valley and New York.',
+                labels: ['Silicon Valley', 'New York', 'Seattle', 'Toronto', 'Vancouver'],
+                jobVolume: [100, 90, 75, 60, 50],
+                salary: [165000, 155000, 150000, 120000, 115000]
+            },
+            'europe': {
+                info: '<strong>Focus:</strong> Strong in automotive, e-commerce, and fintech. Berlin is a major startup hub, while London leads in finance. Growing emphasis on data privacy and ethical AI.',
+                labels: ['London', 'Berlin', 'Paris'],
+                jobVolume: [85, 70, 65],
+                salary: [110000, 95000, 90000]
+            },
+            'asia-pacific': {
+                info: '<strong>Focus:</strong> Rapidly growing market, led by IT services, e-commerce, and telecommunications. Bengaluru and Hyderabad are major outsourcing and tech hubs with high volume.',
+                labels: ['Bengaluru', 'Singapore', 'Sydney', 'Hyderabad'],
+                jobVolume: [90, 70, 65, 80],
+                salary: [55000, 105000, 115000, 50000]
+            }
+        };
+
+        const salaryData = {
+            'data-scientist': { levels: [95000, 135000, 180000] },
+            'data-analyst': { levels: [70000, 95000, 120000] },
+            'data-engineer': { levels: [110000, 145000, 190000] },
+            'ml-engineer': { levels: [120000, 160000, 210000] }
+        };
+
+        let industryChart, skillsChart, jobVolumeChart, salaryRegionChart, salaryExperienceChart;
+
+        const chartTooltip = {
+            callbacks: {
+                label: function(context) {
+                    let label = context.dataset.label || '';
+                    if (label) {
+                        label += ': ';
+                    }
+                    if (context.parsed.y !== null && context.dataset.yAxisID !== 'ySalary') {
+                         label += context.parsed.y;
+                    }
+                    if (context.parsed.x !== null && context.dataset.yAxisID === 'ySalary') {
+                         label += formatCurrency(context.parsed.x);
+                    }
+                    if(context.chart.canvas.id === 'salaryExperienceChart'){
+                         label = context.dataset.label + ': ' + formatCurrency(context.parsed.y);
+                    }
+                    if(context.chart.canvas.id === 'salaryRegionChart'){
+                         label = context.label + ': ' + formatCurrency(context.parsed.y);
+                    }
+                    return label;
+                }
+            }
+        };
+
+        function createIndustryChart() {
+            const ctx = document.getElementById('industryDemandChart').getContext('2d');
+            industryChart = new Chart(ctx, {
+                type: 'bar',
+                data: industryDemandData,
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: chartTooltip
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Relative Demand Score' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateRoleExplorer(roleId) {
+            const role = rolesData[roleId];
+            const detailsContainer = document.getElementById('roleDetails');
+            detailsContainer.innerHTML = `
+                <h4 class="text-xl font-bold text-slate-800 mb-2">${role.title}</h4>
+                <p class="text-slate-600 mb-4">${role.description}</p>
+                <h5 class="font-semibold text-slate-700 mb-2">Key Responsibilities:</h5>
+                <ul class="list-disc list-inside space-y-1 text-slate-600">
+                    ${role.responsibilities.map(r => `<li>${r}</li>`).join('')}
+                </ul>
+            `;
+            
+            if (skillsChart) {
+                skillsChart.data.datasets[0].data = Object.values(role.skills);
+                skillsChart.update();
+            } else {
+                const ctx = document.getElementById('roleSkillsChart').getContext('2d');
+                skillsChart = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: Object.keys(role.skills),
+                        datasets: [{
+                            label: role.title,
+                            data: Object.values(role.skills),
+                            fill: true,
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                            borderColor: 'rgb(59, 130, 246)',
+                            pointBackgroundColor: 'rgb(59, 130, 246)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(59, 130, 246)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 10,
+                                ticks: { stepSize: 2 }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateGeoCharts(regionId) {
+            const region = geoData[regionId];
+            document.getElementById('geo-info').innerHTML = region.info;
+            
+            if (jobVolumeChart) {
+                jobVolumeChart.data.labels = region.labels;
+                jobVolumeChart.data.datasets[0].data = region.jobVolume;
+                jobVolumeChart.update();
+            } else {
+                const ctx = document.getElementById('jobVolumeChart').getContext('2d');
+                jobVolumeChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: region.labels, datasets: [{ label: 'Relative Job Volume', data: region.jobVolume, backgroundColor: '#60A5FA' }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                });
+            }
+
+            if (salaryRegionChart) {
+                salaryRegionChart.data.labels = region.labels;
+                salaryRegionChart.data.datasets[0].data = region.salary;
+                salaryRegionChart.update();
+            } else {
+                const ctx = document.getElementById('salaryRegionChart').getContext('2d');
+                salaryRegionChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: region.labels, datasets: [{ label: 'Average Salary', data: region.salary, backgroundColor: '#818CF8' }] },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, tooltip: chartTooltip },
+                        scales: { y: { ticks: { callback: (value) => formatCurrency(value) } } }
+                    }
+                });
+            }
+        }
+        
+        function updateSalaryExperienceChart(roleId) {
+            const data = salaryData[roleId];
+            if (salaryExperienceChart) {
+                salaryExperienceChart.data.datasets[0].data = data.levels;
+                salaryExperienceChart.update();
+            } else {
+                 const ctx = document.getElementById('salaryExperienceChart').getContext('2d');
+                 salaryExperienceChart = new Chart(ctx, {
+                     type: 'bar',
+                     data: {
+                         labels: ['Entry-Level (0-2 yrs)', 'Mid-Level (3-6 yrs)', 'Senior-Level (7+ yrs)'],
+                         datasets: [{
+                             label: 'Salary',
+                             data: data.levels,
+                             backgroundColor: ['#A78BFA', '#818CF8', '#60A5FA']
+                         }]
+                     },
+                     options: {
+                         responsive: true,
+                         maintainAspectRatio: false,
+                         plugins: { legend: { display: false }, tooltip: chartTooltip },
+                         scales: { y: { beginAtZero: true, ticks: { callback: (value) => formatCurrency(value) } } }
+                     }
+                 });
+            }
+        }
+
+        document.getElementById('roleSelector').addEventListener('change', (e) => updateRoleExplorer(e.target.value));
+        document.getElementById('regionSelector').addEventListener('change', (e) => updateGeoCharts(e.target.value));
+        document.getElementById('salaryRoleSelector').addEventListener('change', (e) => updateSalaryExperienceChart(e.target.value));
+
+        createIndustryChart();
+        updateRoleExplorer('data-scientist');
+        updateGeoCharts('north-america');
+        updateSalaryExperienceChart('data-scientist');
+    });
+    </script>
+</body>
+</html>
